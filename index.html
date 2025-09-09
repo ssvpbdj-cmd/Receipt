@@ -139,21 +139,47 @@
             border-radius: 4px;
         }
 
-        .logo {
-            position: absolute;
-            left: 10px;
-            top: 10px;
-            width: 60px;
-            height: 60px;
-        }
-
         .signature {
             height: 40px;
         }
 
         .receipt-header {
-            font-weight: 700;
-            font-size: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .school-name {
+            flex: 1;
+            text-align: center;
+        }
+
+        .school-logo {
+            flex-shrink: 0;
+        }
+
+        .logo {
+            width: 70px;
+            height: 70px;
+        }
+
+        /* Side Logos */
+        .side-logo {
+            position: absolute;
+            top: 100px;
+            height: 70%;
+            opacity: 0.08;
+            pointer-events: none;
+        }
+
+        .side-logo.left {
+            left: -20px;
+        }
+
+        .side-logo.right {
+            right: -20px;
         }
     </style>
 </head>
@@ -172,7 +198,6 @@
 
                 <label>Name</label>
                 <textarea id="studentName" rows="2" style="width:95%; resize: vertical;" required></textarea>
-
 
                 <label>Ref No (DD/Chq/Online)</label>
                 <input type="text" id="refNo">
@@ -212,52 +237,50 @@
         <div class="preview-container">
             <h3 style="text-align:center;">Live Preview</h3>
             <div id="receiptTemplate" class="receipt">
-                <img src="school_logo.png" class="logo" alt="Logo">
-                <h3 style="text-align:center;">SRI SARASWATHI VIDYA PEETHAM</h3>
-                <h4 style="text-align:center;">BHAGYANAR VIBHAG</h4>
-                <h3 style="text-align:center;">HYDERABAD</h3>
-                <p style="text-align:center;">H.NO.6-3-597/A/7, VENKATARAMANA COLONY, KHAIRATABAD-HYDERABAD-500004</p>
-                <h4 style="text-align:center;">RECEIPT</h4>
 
+                <!-- Side Logos -->
+                <img src="side_logo.png" alt="Left Side Logo" class="side-logo left">
+                <img src="side_logo.png" alt="Right Side Logo" class="side-logo right">
 
+                <div class="receipt-header">
+                    <!-- Left logo -->
+                    <div class="school-logo">
+                        <img src="school_logo.png" class="logo" alt="Left Logo">
+                    </div>
 
+                    <!-- Center school details -->
+                    <div class="school-name">
+                        <h3>SRI SARASWATHI VIDYA PEETHAM</h3>
+                        <h4>BHAGYANAR VIBHAG</h4>
+                        <h3>HYDERABAD</h3>
+                        <p>H.NO.6-3-597/A/7, VENKATARAMANA COLONY, KHAIRATABAD-HYDERABAD-500004</p>
+                        <h4>RECEIPT</h4>
+                    </div>
 
-
-
+                    <!-- Right logo -->
+                    <div class="school-logo">
+                        <img src="school_logo1.png" class="logo" alt="Right Logo">
+                    </div>
+                </div>
 
                 <div style="display:flex; justify-content:space-between; align-items:center; margin:10px 0;">
-                    <!-- Student Name (left) -->
                     <div style="flex:1; font-weight:bold; word-wrap:break-word; text-align:left;">
                         <span id="outStudentName"></span>
                     </div>
-
-                    <!-- Receipt No & Date (right) -->
                     <div style="flex:1; text-align:right; font-size:15px; font-weight:700;">
                         Receipt No: <span id="outReceiptNo"></span><br>
                         Date: <b><span id="outDate"></span></b>
                     </div>
                 </div>
 
-
-
-
-
-
-
-
-
-
-                <!-- Inside receiptTemplate -->
                 <div style="text-align:center; font-size:14px; margin-top:10px;">
                     Received vide D.D / Chq / Online Ref No: <b><span id="outRefNo"></span></b>
                     Date: <b><span id="outDate2"></span></b><br>
                 </div>
                 <div style="text-align:left; font-size:14px; margin-top:10px;">
                     Sum of Rupees: <b><span id="outAmountTotal"></span></b>
-                    (in words: <b><span id="outAmountWords"></span></b> Only)</div>
-
-
-
+                    (in words: <b><span id="outAmountWords"></span></b> Only)
+                </div>
 
                 <table>
                     <thead>
@@ -277,15 +300,8 @@
                     </tfoot>
                 </table>
 
-                <!-- ✅ Signatures Row -->
                 <div style="margin-top:40px; display:flex; justify-content:space-between; align-items:flex-end;">
-
-                    <!-- Accountant at left -->
-                    <div style="flex:1; text-align:center;">
-                        Accountant
-                    </div>
-
-                    <!-- Secretary with signature at right -->
+                    <div style="flex:1; text-align:center;">Accountant</div>
                     <div style="flex:1; text-align:right;">
                         <span style="display:inline-block; vertical-align:middle; text-align:center;">
                             <img src="secretary_sign.png" class="signature" style="display:block; margin:0 auto;">
@@ -293,31 +309,20 @@
                         </span>
                     </div>
                 </div>
-
-
-
-
-
             </div>
         </div>
     </div>
-    </div>
-
-
-
-
-
 
     <script>
         function addRow() {
             let table = document.getElementById("accountRows");
             let row = document.createElement("tr");
             row.innerHTML = `
-        <td><input type="text" class="code"></td>
-        <td><input type="text" class="head"></td>
-        <td><input type="number" class="amount" oninput="updatePreview()"></td>
-        <td><button type="button" class="btn btn-danger" onclick="removeRow(this)">❌</button></td>
-      `;
+                <td><input type="text" class="code"></td>
+                <td><input type="text" class="head"></td>
+                <td><input type="number" class="amount" oninput="updatePreview()"></td>
+                <td><button type="button" class="btn btn-danger" onclick="removeRow(this)">❌</button></td>
+            `;
             table.appendChild(row);
         }
 
@@ -326,10 +331,8 @@
             updatePreview();
         }
 
-        // ✅ Corrected numberToWords
         function numberToWords(num) {
             if (num === 0) return "Zero";
-
             const a = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten",
                 "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen",
                 "Eighteen", "Nineteen"];
@@ -343,40 +346,15 @@
             }
 
             let result = "";
-
-            // Crores (pluralize if > 1)
             let crore = Math.floor(num / 10000000);
-            if (crore > 0) {
-                result += inWords(crore) + " Crore" + (crore > 1 ? "s " : " ");
-                num %= 10000000;
-            }
-
-            // Lakhs (pluralize if > 1)
+            if (crore > 0) { result += inWords(crore) + " Crore" + (crore > 1 ? "s " : " "); num %= 10000000; }
             let lakh = Math.floor(num / 100000);
-            if (lakh > 0) {
-                result += inWords(lakh) + " Lakh" + (lakh > 1 ? "s " : " ");
-                num %= 100000;
-            }
-
-            // Thousands (always singular)
+            if (lakh > 0) { result += inWords(lakh) + " Lakh" + (lakh > 1 ? "s " : " "); num %= 100000; }
             let thousand = Math.floor(num / 1000);
-            if (thousand > 0) {
-                result += inWords(thousand) + " Thousand ";
-                num %= 1000;
-            }
-
-            // Hundreds (always singular)
+            if (thousand > 0) { result += inWords(thousand) + " Thousand "; num %= 1000; }
             let hundred = Math.floor(num / 100);
-            if (hundred > 0) {
-                result += inWords(hundred * 100) + " ";
-                num %= 100;
-            }
-
-            // Below hundred
-            if (num > 0) {
-                result += inWords(num) + " ";
-            }
-
+            if (hundred > 0) { result += inWords(hundred * 100) + " "; num %= 100; }
+            if (num > 0) { result += inWords(num) + " "; }
             return result.trim();
         }
 
@@ -419,32 +397,25 @@
             document.getElementById("formTotal").innerText = formattedTotal;
             document.getElementById("outFinalTotal").innerText = formattedTotal;
             document.getElementById("outAmountTotal").innerText = formattedTotal;
-
             document.getElementById("outAmountWords").innerText = numberToWords(Math.floor(total));
         }
 
         async function generatePDF() {
             let receipt = document.getElementById("receiptTemplate");
-            let autoScale = document.getElementById("autoScale").checked; // ✅ checkbox option
-
+            let autoScale = document.getElementById("autoScale").checked;
             const canvas = await html2canvas(receipt, { scale: 2 });
             const imgData = canvas.toDataURL("image/png", 1.0);
-
             const { jsPDF } = window.jspdf;
             const pdf = new jsPDF("p", "mm", "a4");
-
             let pageWidth = pdf.internal.pageSize.getWidth();
             let pageHeight = pdf.internal.pageSize.getHeight();
             let margin = 10;
             let imgWidth = pageWidth - margin * 2;
             let imgHeight = (canvas.height * imgWidth) / canvas.width;
-
             let availableHeight = (pageHeight - 30) / 2;
 
             if (imgHeight <= availableHeight) {
-                // ✅ Both fit normally
                 pdf.addImage(imgData, "PNG", margin, 10, imgWidth, imgHeight, "", "FAST");
-
                 let cutY = imgHeight + 15;
                 pdf.setFontSize(12);
                 pdf.text("✂", 5, cutY + 3);
@@ -454,20 +425,14 @@
                 pdf.setLineDashPattern([2, 2], 0);
                 pdf.line(margin, cutY, pageWidth - margin, cutY);
                 pdf.setLineDashPattern([], 0);
-
                 pdf.addImage(imgData, "PNG", margin, cutY + 5, imgWidth, imgHeight, "", "FAST");
-
             } else if (autoScale && imgHeight > availableHeight && imgHeight <= pageHeight - 20) {
-                // ⚖️ Scale down if checkbox enabled
                 let scaleFactor = availableHeight / imgHeight;
                 let scaledHeight = imgHeight * scaleFactor;
                 let scaledWidth = imgWidth * scaleFactor;
-
                 let totalUsedHeight = scaledHeight * 2 + 20;
                 let topOffset = (pageHeight - totalUsedHeight) / 2;
-
                 pdf.addImage(imgData, "PNG", (pageWidth - scaledWidth) / 2, topOffset, scaledWidth, scaledHeight, "", "FAST");
-
                 let cutY = topOffset + scaledHeight + 5;
                 pdf.setFontSize(12);
                 pdf.text("✂", 5, cutY + 3);
@@ -477,11 +442,8 @@
                 pdf.setLineDashPattern([2, 2], 0);
                 pdf.line(margin, cutY, pageWidth - margin, cutY);
                 pdf.setLineDashPattern([], 0);
-
                 pdf.addImage(imgData, "PNG", (pageWidth - scaledWidth) / 2, cutY + 5, scaledWidth, scaledHeight, "", "FAST");
-
             } else {
-                // ❌ One per page
                 pdf.addImage(imgData, "PNG", margin, 10, imgWidth, imgHeight, "", "FAST");
                 pdf.addPage();
                 pdf.addImage(imgData, "PNG", margin, 10, imgWidth, imgHeight, "", "FAST");
@@ -490,13 +452,5 @@
             pdf.save("receipt.pdf");
         }
     </script>
-
-
-
-
-
-
-
 </body>
-
 </html>
