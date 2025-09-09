@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Receipt Generator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        body {
+            font-family: "Segoe UI", Tahoma, sans-serif;
+            margin: 0;
+            background: #f4f6f9;
+        }
+
+        h2 {
+            text-align: center;
+            padding: 15px;
+            background: #007bff;
+            color: white;
+            margin: 0;
+            font-size: 22px;
+            letter-spacing: 1px;
+        }
+
+        .container {
+            display: flex;
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .form-container,
+        .preview-container {
+            flex: 1;
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            overflow: auto;
+        }
+
+        label {
+            display: block;
+            margin: 12px 0 6px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        input {
+            padding: 10px;
+            width: 95%;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+
+        input:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            background: #fff;
+        }
+
+        th,
+        td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        th {
+            background: #007bff;
+            color: white;
+        }
+
+        .btn {
+            margin-top: 15px;
+            padding: 10px 15px;
+            cursor: pointer;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+
+        .btn-primary {
+            background: #007bff;
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: #0056b3;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: #fff;
+        }
+
+        .btn-danger:hover {
+            background: #a71d2a;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: #fff;
+        }
+
+        .btn-success:hover {
+            background: #1c7c31;
+        }
+
+        h3 {
+            margin-top: 20px;
+            color: #007bff;
+        }
+
+        .receipt {
+            width: 700px;
+            border: 1px solid black;
+            padding: 15px;
+            margin: 0 auto;
+            background: #fff;
+            position: relative;
+        }
+
+        #accountsTable input {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 6px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .logo {
+            position: absolute;
+            left: 10px;
+            top: 10px;
+            width: 60px;
+            height: 60px;
+        }
+
+        .signature {
+            height: 40px;
+        }
+
+        .receipt-header {
+            font-weight: 700;
+            font-size: 15px;
+        }
+    </style>
+</head>
+
+<body>
+    <h2>Receipt Generator</h2>
+    <div class="container">
+        <!-- Form -->
+        <div class="form-container">
+            <form id="receiptForm" oninput="updatePreview()">
+                <label>Receipt Number</label>
+                <input type="text" id="receiptNo" required>
+
+                <label>Date</label>
+                <input type="date" id="date" required>
+
+                <label>Name</label>
+                <textarea id="studentName" rows="2" style="width:95%; resize: vertical;" required></textarea>
+
+
+                <label>Ref No (DD/Chq/Online)</label>
+                <input type="text" id="refNo">
+
+                <h3>Head of Accounts</h3>
+                <table id="accountsTable">
+                    <thead>
+                        <tr>
+                            <th>Code</th>
+                            <th>Head of Account</th>
+                            <th>Amount</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="accountRows">
+                        <tr>
+                            <td><input type="text" class="code"></td>
+                            <td><input type="text" class="head"></td>
+                            <td><input type="number" class="amount" oninput="updatePreview()"></td>
+                            <td><button type="button" class="btn btn-danger" onclick="removeRow(this)">❌</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <button type="button" class="btn btn-success" onclick="addRow()">➕ Add Row</button>
+                <h4>Total: <span id="formTotal">0</span></h4>
+
+                <label style="margin-top:15px;">
+                    <input type="checkbox" id="autoScale" checked>
+                    Auto-scale receipts to fit one page (if needed)
+                </label>
+
+                <button type="button" class="btn btn-primary" onclick="generatePDF()">Generate PDF</button>
+            </form>
+        </div>
+
+        <!-- Preview -->
+        <div class="preview-container">
+            <h3 style="text-align:center;">Live Preview</h3>
+            <div id="receiptTemplate" class="receipt">
+                <img src="school_logo.png" class="logo" alt="Logo">
+                <h3 style="text-align:center;">SRI SARASWATHI VIDYA PEETHAM</h3>
+                <p style="text-align:center;">H.NO.6-3-597/A/7, VENKATARAMANA COLONY, KHAIRATABAD-HYDERABAD-500004</p>
+                <h4 style="text-align:center;">RECEIPT</h4>
+
+
+
+
+
+
+
+                <div style="display:flex; justify-content:space-between; align-items:center; margin:10px 0;">
+                    <!-- Student Name (left) -->
+                    <div style="flex:1; font-weight:bold; word-wrap:break-word; text-align:left;">
+                        <span id="outStudentName"></span>
+                    </div>
+
+                    <!-- Receipt No & Date (right) -->
+                    <div style="flex:1; text-align:right; font-size:15px; font-weight:700;">
+                        Receipt No: <span id="outReceiptNo"></span><br>
+                        Date: <b><span id="outDate"></span></b>
+                    </div>
+                </div>
+
+
+
+
+
+
+
+
+
+
+                <!-- Inside receiptTemplate -->
+                <div style="text-align:center; font-size:14px; margin-top:10px;">
+                    Received vide D.D / Chq / Online Ref No: <b><span id="outRefNo"></span></b>
+                    Date: <b><span id="outDate2"></span></b><br>
+                </div>
+                <div style="text-align:left; font-size:14px; margin-top:10px;">
+                    Sum of Rupees: <b><span id="outAmountTotal"></span></b>
+                    (in words: <b><span id="outAmountWords"></span></b> Only)</div>
+
+
+
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>S.No</th>
+                            <th>Code</th>
+                            <th>Head of Account</th>
+                            <th>Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody id="outAccountRows"></tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="3"><b>Total</b></td>
+                            <td><span id="outFinalTotal"></span></td>
+                        </tr>
+                    </tfoot>
+                </table>
+
+                <!-- ✅ Signatures Row -->
+                <div style="margin-top:40px; display:flex; justify-content:space-between; align-items:flex-end;">
+
+                    <!-- Accountant at left -->
+                    <div style="flex:1; text-align:center;">
+                        Accountant
+                    </div>
+
+                    <!-- Secretary with signature at right -->
+                    <div style="flex:1; text-align:right;">
+                        <span style="display:inline-block; vertical-align:middle; text-align:center;">
+                            <img src="secretary_sign.png" class="signature" style="display:block; margin:0 auto;">
+                            Secretary
+                        </span>
+                    </div>
+                </div>
+
+
+
+
+
+            </div>
+        </div>
+    </div>
+    </div>
+
+
+
+
+
+
+    <script>
+        function addRow() {
+            let table = document.getElementById("accountRows");
+            let row = document.createElement("tr");
+            row.innerHTML = `
+        <td><input type="text" class="code"></td>
+        <td><input type="text" class="head"></td>
+        <td><input type="number" class="amount" oninput="updatePreview()"></td>
+        <td><button type="button" class="btn btn-danger" onclick="removeRow(this)">❌</button></td>
+      `;
+            table.appendChild(row);
+        }
+
+        function removeRow(btn) {
+            btn.closest("tr").remove();
+            updatePreview();
+        }
+
+        // ✅ Corrected numberToWords
+        function numberToWords(num) {
+            if (num === 0) return "Zero";
+
+            const a = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten",
+                "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen",
+                "Eighteen", "Nineteen"];
+            const b = ["", "", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"];
+
+            function inWords(n) {
+                if (n < 20) return a[n];
+                if (n < 100) return b[Math.floor(n / 10)] + (n % 10 ? " " + a[n % 10] : "");
+                if (n < 1000) return a[Math.floor(n / 100)] + " Hundred" + (n % 100 ? " and " + inWords(n % 100) : "");
+                return "";
+            }
+
+            let result = "";
+
+            // Crores (pluralize if > 1)
+            let crore = Math.floor(num / 10000000);
+            if (crore > 0) {
+                result += inWords(crore) + " Crore" + (crore > 1 ? "s " : " ");
+                num %= 10000000;
+            }
+
+            // Lakhs (pluralize if > 1)
+            let lakh = Math.floor(num / 100000);
+            if (lakh > 0) {
+                result += inWords(lakh) + " Lakh" + (lakh > 1 ? "s " : " ");
+                num %= 100000;
+            }
+
+            // Thousands (always singular)
+            let thousand = Math.floor(num / 1000);
+            if (thousand > 0) {
+                result += inWords(thousand) + " Thousand ";
+                num %= 1000;
+            }
+
+            // Hundreds (always singular)
+            let hundred = Math.floor(num / 100);
+            if (hundred > 0) {
+                result += inWords(hundred * 100) + " ";
+                num %= 100;
+            }
+
+            // Below hundred
+            if (num > 0) {
+                result += inWords(num) + " ";
+            }
+
+            return result.trim();
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return "";
+            let d = new Date(dateStr);
+            let day = String(d.getDate()).padStart(2, "0");
+            let month = String(d.getMonth() + 1).padStart(2, "0");
+            let year = d.getFullYear();
+            return `${day}/${month}/${year}`;
+        }
+
+        function updatePreview() {
+            let receiptNo = document.getElementById("receiptNo").value;
+            let date = document.getElementById("date").value;
+            let studentName = document.getElementById("studentName").value;
+            let refNo = document.getElementById("refNo").value;
+
+            document.getElementById("outReceiptNo").innerText = receiptNo;
+            document.getElementById("outDate").innerText = formatDate(date);
+            document.getElementById("outDate2").innerText = formatDate(date);
+            document.getElementById("outStudentName").innerText = studentName;
+            document.getElementById("outRefNo").innerText = refNo;
+
+            let total = 0, i = 1;
+            let outRows = document.getElementById("outAccountRows");
+            outRows.innerHTML = "";
+            document.querySelectorAll("#accountRows tr").forEach(r => {
+                let code = r.querySelector(".code").value;
+                let head = r.querySelector(".head").value;
+                let amt = Number(r.querySelector(".amount").value) || 0;
+                total += amt;
+                let tr = document.createElement("tr");
+                tr.innerHTML = `<td>${i++}</td><td>${code}</td><td>${head}</td><td>${amt.toFixed(2)}</td>`;
+                outRows.appendChild(tr);
+            });
+
+            let formattedTotal = total.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+            document.getElementById("formTotal").innerText = formattedTotal;
+            document.getElementById("outFinalTotal").innerText = formattedTotal;
+            document.getElementById("outAmountTotal").innerText = formattedTotal;
+
+            document.getElementById("outAmountWords").innerText = numberToWords(Math.floor(total));
+        }
+
+        async function generatePDF() {
+            let receipt = document.getElementById("receiptTemplate");
+            let autoScale = document.getElementById("autoScale").checked; // ✅ checkbox option
+
+            const canvas = await html2canvas(receipt, { scale: 2 });
+            const imgData = canvas.toDataURL("image/png", 1.0);
+
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF("p", "mm", "a4");
+
+            let pageWidth = pdf.internal.pageSize.getWidth();
+            let pageHeight = pdf.internal.pageSize.getHeight();
+            let margin = 10;
+            let imgWidth = pageWidth - margin * 2;
+            let imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+            let availableHeight = (pageHeight - 30) / 2;
+
+            if (imgHeight <= availableHeight) {
+                // ✅ Both fit normally
+                pdf.addImage(imgData, "PNG", margin, 10, imgWidth, imgHeight, "", "FAST");
+
+                let cutY = imgHeight + 15;
+                pdf.setFontSize(12);
+                pdf.text("✂", 5, cutY + 3);
+                pdf.text("✂", pageWidth - 8, cutY + 3);
+                pdf.setLineWidth(0.5);
+                pdf.setDrawColor(150);
+                pdf.setLineDashPattern([2, 2], 0);
+                pdf.line(margin, cutY, pageWidth - margin, cutY);
+                pdf.setLineDashPattern([], 0);
+
+                pdf.addImage(imgData, "PNG", margin, cutY + 5, imgWidth, imgHeight, "", "FAST");
+
+            } else if (autoScale && imgHeight > availableHeight && imgHeight <= pageHeight - 20) {
+                // ⚖️ Scale down if checkbox enabled
+                let scaleFactor = availableHeight / imgHeight;
+                let scaledHeight = imgHeight * scaleFactor;
+                let scaledWidth = imgWidth * scaleFactor;
+
+                let totalUsedHeight = scaledHeight * 2 + 20;
+                let topOffset = (pageHeight - totalUsedHeight) / 2;
+
+                pdf.addImage(imgData, "PNG", (pageWidth - scaledWidth) / 2, topOffset, scaledWidth, scaledHeight, "", "FAST");
+
+                let cutY = topOffset + scaledHeight + 5;
+                pdf.setFontSize(12);
+                pdf.text("✂", 5, cutY + 3);
+                pdf.text("✂", pageWidth - 8, cutY + 3);
+                pdf.setLineWidth(0.5);
+                pdf.setDrawColor(150);
+                pdf.setLineDashPattern([2, 2], 0);
+                pdf.line(margin, cutY, pageWidth - margin, cutY);
+                pdf.setLineDashPattern([], 0);
+
+                pdf.addImage(imgData, "PNG", (pageWidth - scaledWidth) / 2, cutY + 5, scaledWidth, scaledHeight, "", "FAST");
+
+            } else {
+                // ❌ One per page
+                pdf.addImage(imgData, "PNG", margin, 10, imgWidth, imgHeight, "", "FAST");
+                pdf.addPage();
+                pdf.addImage(imgData, "PNG", margin, 10, imgWidth, imgHeight, "", "FAST");
+            }
+
+            pdf.save("receipt.pdf");
+        }
+    </script>
+
+
+
+
+
+
+
+</body>
+
+</html>
